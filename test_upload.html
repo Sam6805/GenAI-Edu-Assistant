@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload Test</title>
+</head>
+<body>
+    <h1>PDF Upload Test</h1>
+    <input type="file" id="fileInput" accept=".pdf">
+    <button onclick="testUpload()">Test Upload</button>
+    <pre id="output"></pre>
+
+    <script>
+        const API_URL = 'http://localhost:8001';
+        
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const output = document.getElementById('output');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                output.textContent = 'Please select a file';
+                return;
+            }
+            
+            output.textContent = 'Uploading...\n';
+            output.textContent += `File: ${file.name}\n`;
+            output.textContent += `Size: ${file.size} bytes\n`;
+            output.textContent += `Type: ${file.type}\n\n`;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                output.textContent += 'Sending request...\n';
+                
+                const response = await fetch(`${API_URL}/upload-pdf`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                output.textContent += `Status: ${response.status} ${response.statusText}\n`;
+                
+                const text = await response.text();
+                output.textContent += `Response:\n${text}`;
+                
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    output.textContent += `\n\n✅ SUCCESS!\nFilename: ${data.filename}\nPages: ${data.pages}`;
+                } else {
+                    output.textContent += `\n\n❌ FAILED!`;
+                }
+                
+            } catch (error) {
+                output.textContent += `\n\n❌ ERROR: ${error.message}\n${error.stack}`;
+            }
+        }
+    </script>
+</body>
+</html>

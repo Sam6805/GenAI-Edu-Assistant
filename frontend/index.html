@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Educational Content Assistant</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📚 Educational Content Assistant</h1>
+            <p class="subtitle">AI-powered study material Q&A</p>
+        </header>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-container">
+                <label for="pdfUpload" class="upload-label">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <span id="uploadText">Upload PDF</span>
+                </label>
+                <input type="file" id="pdfUpload" accept=".pdf" />
+            </div>
+            
+            <div class="status-container">
+                <div id="uploadStatus" class="upload-status"></div>
+            </div>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="mode-section">
+            <label for="mode" class="mode-label">Response Mode:</label>
+            <select id="mode" class="mode-select">
+                <option value="default">💬 Default - Balanced explanation</option>
+                <option value="exam">📝 Exam - Formal academic format</option>
+                <option value="summary">⚡ Summary - Quick bullet points</option>
+                <option value="explain_like_5">👶 Explain Like I'm 5 - Simple language</option>
+                <option value="creative">🎨 Creative - Story-based learning</option>
+            </select>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-container">
+            <div id="chat" class="chat-window">
+                <div class="welcome-message">
+                    <h2>👋 Welcome!</h2>
+                    <p>Upload a PDF to get started. Then ask any questions about the content.</p>
+                    <ul class="features">
+                        <li>✅ Upload study materials in PDF format</li>
+                        <li>✅ Ask questions and get instant answers</li>
+                        <li>✅ Choose different response styles</li>
+                        <li>✅ Answers based only on your uploaded content</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <input 
+                    id="question" 
+                    type="text" 
+                    placeholder="Ask a question about your study material..." 
+                    class="question-input"
+                    disabled
+                />
+                <button id="sendBtn" onclick="ask()" class="send-button" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                    Send
+                </button>
+            </div>
+        </div>
+
+        <!-- History Panel (Optional Toggle) -->
+        <div class="history-section">
+            <button id="historyToggle" class="history-toggle" onclick="toggleHistory()">
+                📜 View History
+            </button>
+            <div id="historyPanel" class="history-panel hidden">
+                <h3>Conversation History</h3>
+                <div id="historyContent" class="history-content">
+                    <p class="empty-history">No questions asked yet</p>
+                </div>
+                <button onclick="clearHistory()" class="clear-history-btn">Clear History</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

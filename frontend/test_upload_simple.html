@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test - Educational Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .loading { background: #fff3cd; color: #856404; }
+        button {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #6d28d9;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        input[type="file"] {
+            margin: 15px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        .details {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Upload Diagnostic Test</h1>
+        <div id="status" class="status info">Ready to test upload</div>
+        
+        <div>
+            <input type="file" id="fileInput" accept=".pdf">
+            <button onclick="testUpload()" id="uploadBtn">🚀 Test Upload</button>
+            <button onclick="testConnection()" id="testBtn">🔍 Test Server Connection</button>
+        </div>
+        
+        <div class="details">
+            <h3>Response Details:</h3>
+            <pre id="response">No test run yet</pre>
+        </div>
+        
+        <div class="details">
+            <h3>Console Logs:</h3>
+            <pre id="logs"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:8001';
+        let logs = [];
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push(logEntry);
+            document.getElementById('logs').textContent = logs.join('\n');
+            console.log(message);
+        }
+
+        async function testConnection() {
+            const statusEl = document.getElementById('status');
+            const responseEl = document.getElementById('response');
+            
+            statusEl.className = 'status loading';
+            statusEl.textContent = '🔍 Testing server connection...';
+            log('Testing connection to ' + API_URL);
+            
+            try {
+                const response = await fetch(`${API_URL}/`);
+                const data = await response.json();
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = '✅ Server is responding!';
+                responseEl.textContent = JSON.stringify(data, null, 2);
+                log('✅ Server connection successful');
+                log('Response: ' + JSON.stringify(data));
+                
+            } catch (error) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '❌ Cannot connect to server';
+                responseEl.textContent = `Error: ${error.message}\n\nMake sure the server is running on port 8001`;
+                log('❌ Connection failed: ' + error.message);
+            }
+        }
+
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const statusEl = document.getElementById('status');
+            const responseEl = document.getElementById('response');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a PDF file first');
+                return;
+            }
+            
+            if (!file.name.endsWith('.pdf')) {
+                alert('Please select a PDF file');
+                return;
+            }
+            
+            uploadBtn.disabled = true;
+            statusEl.className = 'status loading';
+            statusEl.textContent = '📤 Uploading ' + file.name + '...';
+            log('Starting upload: ' + file.name + ' (' + file.size + ' bytes)');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            log('FormData created with file field');
+            log('Sending POST to ' + API_URL + '/upload-pdf');
+            
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => {
+                    controller.abort();
+                    log('⏱️ Request timed out after 120 seconds');
+                }, 120000);
+                
+                const startTime = Date.now();
+                
+                const response = await fetch(`${API_URL}/upload-pdf`, {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal
+                });
+                
+                clearTimeout(timeoutId);
+                const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+                
+                log(`Response received in ${duration}s - Status: ${response.status}`);
+                
+                const responseText = await response.text();
+                log('Raw response: ' + responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    throw new Error('Invalid JSON response: ' + responseText);
+                }
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Upload failed with status ' + response.status);
+                }
+                
+                statusEl.className = 'status success';
+                statusEl.textContent = `✅ Upload successful! (${duration}s)`;
+                responseEl.textContent = JSON.stringify(data, null, 2);
+                log('✅ Upload completed successfully');
+                log('Server response: ' + JSON.stringify(data));
+                
+            } catch (error) {
+                statusEl.className = 'status error';
+                
+                if (error.name === 'AbortError') {
+                    statusEl.textContent = '❌ Upload timed out (>2 minutes)';
+                    responseEl.textContent = 'The upload took too long. This might happen with large PDFs or slow embedding generation.\n\nTry:\n1. Use a smaller PDF\n2. Check server logs for errors';
+                    log('❌ Upload aborted - timeout');
+                } else if (error.message.includes('Failed to fetch')) {
+                    statusEl.textContent = '❌ Cannot connect to server';
+                    responseEl.textContent = 'Error: Cannot connect to http://localhost:8001\n\nMake sure:\n1. Server is running\n2. Port 8001 is not blocked\n3. Check server window for errors';
+                    log('❌ Fetch failed - server not reachable');
+                } else {
+                    statusEl.textContent = '❌ Upload failed';
+                    responseEl.textContent = `Error: ${error.message}\n\nStack: ${error.stack}`;
+                    log('❌ Upload failed: ' + error.message);
+                }
+                
+            } finally {
+                uploadBtn.disabled = false;
+            }
+        }
+
+        // Test connection on load
+        window.addEventListener('load', () => {
+            log('Page loaded - ready for testing');
+            setTimeout(testConnection, 500);
+        });
+    </script>
+</body>
+</html>
