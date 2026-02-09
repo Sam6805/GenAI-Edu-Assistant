@@ -69,7 +69,6 @@ Simple UI built with HTML, CSS, and JavaScript.
 ## 🏗️ Project Architecture
 
 GenAI-Edu-Assistant/
-│
 ├── backend/
 │   ├── __pycache__/              # Python cache files
 │   ├── venv/                     # Backend virtual environment (ignored in git)
@@ -91,7 +90,6 @@ GenAI-Edu-Assistant/
 │   └── test_upload_simple.html   # PDF upload testing page
 │
 ├── uploads/                      # Uploaded PDF files (ignored in git)
-│
 ├── .env                          # Environment variables (API keys) – ignored
 ├── .env.example                  # Sample environment variable template
 ├── .gitignore                    # Files and folders excluded from git
