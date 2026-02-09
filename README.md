@@ -127,6 +127,20 @@ uvicorn app.api.main:app --reload
 
 http://127.0.0.1:8000/docs
 
+Endpoint
+
+POST /ask
+
+Request Body
+
+{
+  "question": "What happens after death?"
+}
+
+Response
+
+"Generated answer from the AI model"
+
 ## Unique Aspect:
 
 The project uniquely combines RAG, prompt compression, and mode-based learning, making it both cost-efficient and adaptable to different educational needs.
@@ -140,21 +154,6 @@ The project uniquely combines RAG, prompt compression, and mode-based learning, 
 --Personalized learning insights
 
 --Cloud deployment
-
-Endpoint
-
-POST /ask
-
-
-Request Body
-
-{
-  "question": "What happens after death?"
-}
-
-Response
-
-"Generated answer from the AI model"
 
 ⚠️ Known Issues / Limitations
 
